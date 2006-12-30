@@ -12,7 +12,11 @@ $@
   and plan skip_all => "Tk not available";
 
 my $im;
-my $mw = Tk::MainWindow->new;
+my $mw;
+eval {
+  $mw = Tk::MainWindow->new;
+};
+$@ and plan skip_all => 'Cannot create a window in Tk';
 
 $mw->windowingsystem eq 'win32'
   or plan skip_all => 'Tk windowing system not Win32';

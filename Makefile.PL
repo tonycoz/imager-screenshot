@@ -1,3 +1,4 @@
+#!perl -w
 use strict;
 use ExtUtils::MakeMaker;
 use Imager::ExtUtils;
@@ -7,16 +8,19 @@ use File::Spec;
 my @objs = qw/Screenshot.o/;
 my @cflags;
 my @lflags;
-if (find_header("X11/X.h") and find_lib("X11")) {
+my $X11_lib = $^O eq 'cygwin' ? 'X11.dll' : 'X11';
+if (find_header("X11/Xlib.h") and find_lib($X11_lib)) {
   push @objs, 'scx11.o';
   push @cflags, '-DSS_X11';
-  push @lflags, '-lX11';
+  push @lflags, '-l'.$X11_lib;
   print "Found X11\n";
 }
 if (find_header('windows.h') and find_lib('gdi32')) {
   push @objs, 'scwin32.o';
   push @cflags, '-DSS_WIN32';
-  push @lflags, '-lgdi32' if $^O eq 'cygwin';
+  if ($^O eq 'cygwin') {
+    push @lflags, '-L/usr/lib/w32api', '-lgdi32';
+  }
   print "Found Win32\n";
 }
 
@@ -51,13 +55,15 @@ sub header_search_path {
   @incs and return @incs;
 
   push @incs, '/usr/include'
-    unless $^O eq 'MSWin32';
+    unless $^O eq 'MSWin32' && $Config{cc} =~ /\bcl\b/;
   push @incs, split /\Q$Config{path_sep}/, $ENV{INCLUDE}
     if $^O eq 'MSWin32' && $Config{cc} =~ /\bcl\b/ and $ENV{INCLUDE};
   push @incs, split ' ', $Config{locincpth}
     if $Config{locincpth};
   push @incs, split /\Q$Config{path_sep}/, $Config{incpath}
     if $Config{incpath};
+  push @incs, '/usr/include/w32api', '/usr/X11R6/include'
+    if $^O eq 'cygwin';
 
   @incs = grep -d, @incs;
 
@@ -69,13 +75,15 @@ sub library_search_path {
   @libs and return @libs;
 
   push @libs, '/usr/lib'
-    unless $^O eq 'MSWin32';
+    unless $^O eq 'MSWin32' && $Config{cc} =~ /\bcl\b/;
   push @libs, split /\Q$Config{path_sep}/, $ENV{LIB}
     if $^O eq 'MSWin32' && $Config{cc} =~ /\bcl\b/ and $ENV{LIB};
   push @libs, split ' ', $Config{loclibpth}
     if $Config{loclibpth};
   push @libs, split /\Q$Config{path_sep}/, $Config{libpth}
     if $Config{libpth};
+  push @libs, '/usr/lib/w32api', '/usr/X11R6/lib'
+    if $^O eq 'cygwin';
 
   @libs = grep -d, @libs;
 
@@ -95,10 +103,15 @@ sub find_header {
 
 sub find_lib {
   my $name = shift;
+  my @found;
   if ($^O eq 'MSWin32') {
-    return _find_file($name . $Config{_a}, library_search_path());
+    @found = _find_file($name . $Config{_a}, library_search_path());
   }
   else {
-    return _find_file("lib" . $name . $Config{_a}, library_search_path());
+    @found = _find_file("lib" . $name . $Config{_a}, library_search_path());
   }
+  if (@found) {
+    push @lflags, "-L$_" for @found;
+  }
+  @found;
 }
