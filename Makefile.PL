@@ -7,12 +7,12 @@ use File::Spec;
 my @objs = qw/Screenshot.o/;
 my @cflags;
 my @lflags;
-#if (find_header("X11.h") and find_lib("X11")) {
-#  push @objs, 'scx11.o';
-#  push @cflags, '-DSS_X11';
-#  push @lflags, '-lX11';
-#  print "Found X11\n";
-#}
+if (find_header("X11/X.h") and find_lib("X11")) {
+  push @objs, 'scx11.o';
+  push @cflags, '-DSS_X11';
+  push @lflags, '-lX11';
+  print "Found X11\n";
+}
 if (find_header('windows.h') and find_lib('gdi32')) {
   push @objs, 'scwin32.o';
   push @cflags, '-DSS_WIN32';
@@ -20,8 +20,7 @@ if (find_header('windows.h') and find_lib('gdi32')) {
   print "Found Win32\n";
 }
 
-unless (@objs) {
-  WriteEmptyMakefile();
+unless (@objs > 1) {
   die "Sorry, I can't find headers or libraries for a supported GUI\n"
 }
 
@@ -51,6 +50,8 @@ my @incs;
 sub header_search_path {
   @incs and return @incs;
 
+  push @incs, '/usr/include'
+    unless $^O eq 'MSWin32';
   push @incs, split /\Q$Config{path_sep}/, $ENV{INCLUDE}
     if $^O eq 'MSWin32' && $Config{cc} =~ /\bcl\b/ and $ENV{INCLUDE};
   push @incs, split ' ', $Config{locincpth}
@@ -67,6 +68,8 @@ my @libs;
 sub library_search_path {
   @libs and return @libs;
 
+  push @libs, '/usr/lib'
+    unless $^O eq 'MSWin32';
   push @libs, split /\Q$Config{path_sep}/, $ENV{LIB}
     if $^O eq 'MSWin32' && $Config{cc} =~ /\bcl\b/ and $ENV{LIB};
   push @libs, split ' ', $Config{loclibpth}
