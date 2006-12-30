@@ -104,7 +104,7 @@ sub find_header {
 sub find_lib {
   my $name = shift;
   my @found;
-  if ($^O eq 'MSWin32') {
+  if ($^O eq 'MSWin32' && $Config{_a} eq '.lib') {
     @found = _find_file($name . $Config{_a}, library_search_path());
   }
   else {
