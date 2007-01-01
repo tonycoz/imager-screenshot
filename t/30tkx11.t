@@ -18,6 +18,8 @@ $@
 
 my $mw = Tk::MainWindow->new;
 
+$mw->can('windowingsystem')
+  or plan skip_all => 'Cannot determine windowing system';
 $mw->windowingsystem eq 'x11'
   or plan skip_all => 'Tk windowing system not X11';
 

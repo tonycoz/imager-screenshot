@@ -18,6 +18,9 @@ eval {
 };
 $@ and plan skip_all => 'Cannot create a window in Tk';
 
+$mw->can('windowingsystem')
+  or plan skip_all => 'Cannot determine windowing system';
+
 $mw->windowingsystem eq 'win32'
   or plan skip_all => 'Tk windowing system not Win32';
 
