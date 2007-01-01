@@ -32,45 +32,43 @@ sub screenshot {
   my $result;
   if (!@_) {
     my $result =
-      defined &win32 ? win32(0) :
-	defined &x11 ? x11($opts{display}, 0) :
+      defined &_win32 ? _win32(0) :
+	defined &_x11 ? _x11($opts{display}, 0) :
 	   die "No drivers enabled\n";
   }
   if (defined $opts{hwnd}) {
-    defined &win32
+    defined &_win32
       or die "Win32 driver not enabled\n";
-    $result = win32($opts{hwnd}, $opts{decor});
+    $result = _win32($opts{hwnd}, $opts{decor});
   }
   elsif (defined $opts{id}) { # X11 window id
-    defined &x11
+    defined &_x11
       or die "X11 driver not enabled\n";
-    $result = x11($opts{display}, $opts{id});
+    $result = _x11($opts{display}, $opts{id});
   }
   elsif ($opts{widget}) {
     # Perl/Tk widget
     my $top = $opts{widget}->toplevel;
     my $sys = $top->windowingsystem;
     if ($sys eq 'win32') {
-      unless (defined &win32) {
+      unless (defined &_win32) {
         Imager->_set_error("Win32 Tk and Win32 support not built");
         return;
       }
-      $result = win32(hex($opts{widget}->id));
+      $result = _win32(hex($opts{widget}->id));
     }
     elsif ($sys eq 'x11') {
-      unless (defined &x11) {
+      unless (defined &_x11) {
         Imager->_set_error("X11 Tk and X11 support not built");
         return;
       }
 
       my $id_hex = $opts{widget}->id;
-      print "id $id_hex\n";
       $opts{widget}->can('frame') 
         and $id_hex = $opts{widget}->frame;
-      print "id $id_hex\n";
       
       # is there a way to get the display pointer from Tk?
-      $result = x11(0, hex($id_hex));
+      $result = _x11(0, hex($id_hex));
     }
     else {
       Imager->_set_error("Unsupported windowing system '$sys'");
@@ -87,11 +85,11 @@ sub screenshot {
 }
 
 sub have_win32 {
-  defined &win32;
+  defined &_win32;
 }
 
 sub have_x11 {
-  defined &x11;
+  defined &_x11;
 }
 
 sub x11_open {

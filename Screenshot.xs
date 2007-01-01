@@ -9,7 +9,7 @@ DEFINE_IMAGER_CALLBACKS;
 
 #define imss__x11_open imss_x11_open
 
-MODULE = Imager::Screenshot  PACKAGE = Imager::Screenshot PREFIX = imss_
+MODULE = Imager::Screenshot  PACKAGE = Imager::Screenshot PREFIX = imss
 
 PROTOTYPES: DISABLE
 
@@ -30,7 +30,7 @@ imss_x11(display, window_id)
 	int window_id
 
 unsigned long
-imss__x11_open(display_name = NULL)
+imss_x11_open(display_name = NULL)
         const char *display_name
 
 void
