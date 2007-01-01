@@ -204,6 +204,10 @@ Closes a display returned by Imager::Screenshot::x11_open().
 
 =back
 
+=head1 LICENSE
+
+Imager::Screenshot is licensed under the same terms as Perl itself.
+
 =head1 AUTHOR
 
 Tony Cook <tonyc@cpan.org>
