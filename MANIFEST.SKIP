@@ -10,3 +10,4 @@ vc60\.pdb
 \.obj$
 \.o$
 \.bak$
+^Screenshot.c$
