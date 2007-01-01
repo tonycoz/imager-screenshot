@@ -54,7 +54,7 @@ my @incs;
 sub header_search_path {
   @incs and return @incs;
 
-  push @incs, '/usr/include'
+  push @incs, '/usr/include', '/usr/X11R6'
     unless $^O eq 'MSWin32' && $Config{cc} =~ /\bcl\b/;
   push @incs, split /\Q$Config{path_sep}/, $ENV{INCLUDE}
     if $^O eq 'MSWin32' && $Config{cc} =~ /\bcl\b/ and $ENV{INCLUDE};
@@ -74,7 +74,7 @@ my @libs;
 sub library_search_path {
   @libs and return @libs;
 
-  push @libs, '/usr/lib'
+  push @libs, '/usr/lib', '/usr/X11R6/lib'
     unless $^O eq 'MSWin32' && $Config{cc} =~ /\bcl\b/;
   push @libs, split /\Q$Config{path_sep}/, $ENV{LIB}
     if $^O eq 'MSWin32' && $Config{cc} =~ /\bcl\b/ and $ENV{LIB};
