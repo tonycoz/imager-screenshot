@@ -1,0 +1,11 @@
+# http://module-build.sourceforge.net/META-spec.html
+#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+name:         Imager-Screenshot
+version:      0.001
+version_from: Screenshot.pm
+installdirs:  site
+requires:
+    Imager:                        0.54
+
+distribution_type: module
+generated_by: ExtUtils::MakeMaker version 6.17

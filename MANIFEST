@@ -15,3 +15,4 @@ t/30tkx11.t			Test - X11 implementation via Tk
 t/40tkwin32.t			Test - Win32 implementation via Tk
 t/90pod.t			Test - check POD is valid
 t/91podcover.t			Test - check all functions are covered by POD
+META.yml                                 Module meta-data (added by MakeMaker)
