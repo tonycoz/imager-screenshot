@@ -166,6 +166,8 @@ window.  I<display object> is a integer version of an X11 C< Display *
 >, if this isn't supplied C<screenshot()> will attempt connect to the
 the display specified by $ENV{DISPLAY}.
 
+Note: taking a screenshot of a remote display is slow.
+
 =item screenshot
 
 If no parameters are supplied:
