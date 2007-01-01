@@ -102,6 +102,10 @@ sub x11_open {
   return $display;
 }
 
+sub x11_close {
+  _x11_close(shift);
+}
+
 1;
 
 __END__
