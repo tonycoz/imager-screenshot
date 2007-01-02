@@ -11,3 +11,6 @@ vc60\.pdb
 \.o$
 \.bak$
 ^Screenshot.c$
+^Imager-Screenshot-.*\.tar\.gz$
+^Imager-Screenshot-.*/
+

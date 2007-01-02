@@ -7,7 +7,7 @@ Requires:
   X11 header files and libraries for X11 support.
   A C compiler compatible with that used to build perl itself.
 
-Optional
+Optional:
   Perl/Tk
 
 Installation:
@@ -24,3 +24,7 @@ Tested under:
  - Win32 (mingw)
  - Win32/X11 (cygwin as of Jan 1 2007)
  - X11 (Debian Linux)
+
+License:
+
+Imager::Screenshot is distributed under the same terms as perl itself.
