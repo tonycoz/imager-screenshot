@@ -1,2 +1,8 @@
+0.002 2 Jan 2007
+	Just packaging changes:
+	- README was missing
+	- updated my EU::MM and I now set the LICENSE key so it's set
+	  in META.yml
+
 0.001 1 Jan 2007
 	- Initial release with X11 and Win32 support
