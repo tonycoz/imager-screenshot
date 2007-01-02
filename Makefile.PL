@@ -48,6 +48,10 @@ if ($ExtUtils::MakeMaker::VERSION > 6.06) {
   $opts{ABSTRACT} = 'Screen/Window capture to Imager images';
 }
 
+if ($ExtUtils::MakeMaker::VERSION > 6.06) {
+  $opts{LICENSE} = 'perl';
+}
+
 WriteMakefile(%opts);
 
 my @incs;
