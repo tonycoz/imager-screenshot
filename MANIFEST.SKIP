@@ -13,4 +13,5 @@ vc60\.pdb
 ^Screenshot.c$
 ^Imager-Screenshot-.*\.tar\.gz$
 ^Imager-Screenshot-.*/
-
+^dll\.exp$
+^dll\.base$
