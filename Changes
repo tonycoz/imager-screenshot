@@ -1,4 +1,5 @@
-0.003
+0.003 12 Jan 2007
+	- 0.003 release
 	- ignore some VC++ generated junk in MANIFEST.SKIP
 	- avoid some Makefile.PL warnings
 	- use Imager in Makefile.PL since I'd prefer to error on that
