@@ -8,6 +8,8 @@ use File::Spec;
 my @objs = qw/Screenshot.o/;
 my @cflags;
 my @lflags;
+my %seen_incdir;
+my %seen_libdir;
 my $X11_lib = $^O eq 'cygwin' ? 'X11.dll' : 'X11';
 if (find_header("X11/Xlib.h") and find_lib($X11_lib)) {
   push @objs, 'scx11.o';
@@ -48,7 +50,7 @@ if ($ExtUtils::MakeMaker::VERSION > 6.06) {
   $opts{ABSTRACT} = 'Screen/Window capture to Imager images';
 }
 
-if ($ExtUtils::MakeMaker::VERSION > 6.06) {
+if ($ExtUtils::MakeMaker::VERSION > 6.30) {
   $opts{LICENSE} = 'perl';
 }
 
@@ -58,7 +60,7 @@ my @incs;
 sub header_search_path {
   @incs and return @incs;
 
-  push @incs, '/usr/include', '/usr/X11R6'
+  push @incs, '/usr/include', '/usr/X11R6/include'
     unless $^O eq 'MSWin32' && $Config{cc} =~ /\bcl\b/;
   push @incs, split /\Q$Config{path_sep}/, $ENV{INCLUDE}
     if $^O eq 'MSWin32' && $Config{cc} =~ /\bcl\b/ and $ENV{INCLUDE};
@@ -102,7 +104,14 @@ sub _find_file {
 }
 
 sub find_header {
-  _find_file($_[0], header_search_path());
+  my @found = _find_file($_[0], header_search_path());
+
+  if (@found) {
+      push @cflags, "-I$_" for grep !$seen_incdir{$_}, @found;
+      @seen_incdir{@found} = (1) x @found;
+  }
+
+  @found;
 }
 
 sub find_lib {
@@ -115,7 +124,8 @@ sub find_lib {
     @found = _find_file("lib" . $name . $Config{_a}, library_search_path());
   }
   if (@found) {
-    push @lflags, "-L$_" for @found;
+    push @lflags, "-L$_" for grep !$seen_libdir{$_}, @found;
+    @seen_libdir{@found} = (1) x @found;
   }
   @found;
 }

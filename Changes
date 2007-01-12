@@ -1,3 +1,10 @@
+0.003
+	- Makefile.PL was checking /usr/X11R6 for headers instead of 
+	  /usr/X11R6/include
+	- add header directories as -I flags if we find a header in
+	  them
+	- avoid duplicate -L flags
+
 0.002 2 Jan 2007
 	Just packaging changes:
 	- README was missing
