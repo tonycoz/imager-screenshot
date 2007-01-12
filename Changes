@@ -1,4 +1,7 @@
 0.003
+	- the x11 capture wasn't releasing the XImage or the line
+	  and color buffers.
+	- x11_open() incorrectly reset the error handler to junk
 	- Makefile.PL was checking /usr/X11R6 for headers instead of 
 	  /usr/X11R6/include
 	- add header directories as -I flags if we find a header in

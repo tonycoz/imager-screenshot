@@ -80,6 +80,9 @@ imss_x11(unsigned long display_ul, unsigned long window_id) {
     }
     i_plin(result, 0, attr.width, y, line);
   }
+  myfree(line);
+  myfree(colors);
+  XDestroyImage(image);
 
   XSetErrorHandler(old_handler);
   if (own_display)
@@ -94,7 +97,7 @@ imss_x11_open(char const *display_name) {
   Display *display;
 
   i_clear_error();
-  XSetErrorHandler(my_handler);
+  old_handler = XSetErrorHandler(my_handler);
   display = XOpenDisplay(display_name);
   if (!display)
     i_push_errorf(0, "Cannot connect to X server %s", XDisplayName(display_name));
