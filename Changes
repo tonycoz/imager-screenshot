@@ -1,4 +1,8 @@
 0.003
+	- avoid some Makefile.PL warnings
+	- use Imager in Makefile.PL since I'd prefer to error on that
+	  rather than Imager::ExtUtils
+	- work around Debian strangeness
 	- the x11 capture wasn't releasing the XImage or the line
 	  and color buffers.
 	- x11_open() incorrectly reset the error handler to junk

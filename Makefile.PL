@@ -1,6 +1,7 @@
 #!perl -w
 use strict;
 use ExtUtils::MakeMaker;
+use Imager 0.54;
 use Imager::ExtUtils;
 use Config;
 use File::Spec;
@@ -45,12 +46,17 @@ my %opts =
 $opts{LIBS} = "@lflags" if @lflags;
 $opts{INC} .= " @cflags" if @cflags;
 
-if ($ExtUtils::MakeMaker::VERSION > 6.06) {
+# avoid "... isn't numberic in numeric gt ..." warnings for dev versions
+my $eu_mm_version = eval $ExtUtils::MakeMaker::VERSION;
+if ($eu_mm_version > 6.06) {
   $opts{AUTHOR} = 'Tony Cook <tonyc@cpan.org>';
   $opts{ABSTRACT} = 'Screen/Window capture to Imager images';
 }
 
-if ($ExtUtils::MakeMaker::VERSION > 6.30) {
+# LICENSE was introduced in 6.30_01, but Debian etch includes
+# (as of 2007/01/12) an ExtUtils::MakeMaker versioned 6.30_01 without
+# LICENSE support
+if ($eu_mm_version > 6.3001) {
   $opts{LICENSE} = 'perl';
 }
 
