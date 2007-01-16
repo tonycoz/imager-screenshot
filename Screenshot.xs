@@ -16,18 +16,26 @@ PROTOTYPES: DISABLE
 #ifdef SS_WIN32
 
 Imager
-imss_win32(hwnd, include_decor = 0)
+imss_win32(hwnd, include_decor = 0, left = 0, top = 0, right = 0, bottom = 0)
 	unsigned hwnd
 	int include_decor
+	int left
+	int top
+	int right
+	int bottom
 
 #endif
 
 #ifdef SS_X11
 
 Imager
-imss_x11(display, window_id)
+imss_x11(display, window_id, left = 0, top = 0, right = 0, bottom = 0)
         unsigned long display
 	int window_id
+	int left
+	int top
+	int right
+	int bottom
 
 unsigned long
 imss_x11_open(display_name = NULL)

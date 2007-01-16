@@ -1,3 +1,11 @@
+0.004
+	- add support for getting a subimage of the window
+	- include the interface header in the implementations so we
+	  get errors when they don't match (doh!)
+	- return something from the X11 error handler
+	- add X11/Xutil.h include for XDestroyImage()
+	- handle the default (no id or hwnd) case correctly
+
 0.003 12 Jan 2007
 	- 0.003 release
 	- ignore some VC++ generated junk in MANIFEST.SKIP

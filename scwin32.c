@@ -1,17 +1,20 @@
 #include "imext.h"
 #include <windows.h>
 #include <string.h>
+#include "imss.h"
 
 i_img *
-imss_win32(unsigned hwnd_u, int include_decor) {
+imss_win32(unsigned hwnd_u, int include_decor, int left, int top, 
+	   int right, int bottom) {
   HWND hwnd = (HWND)hwnd_u;
   HDC wdc, bmdc;
   RECT rect;
   HBITMAP work_bmp, old_dc_bmp;
-  int width, height;
+  int window_width, window_height;
   BITMAPINFO bmi;
   unsigned char *di_bits;
   i_img *result = NULL;
+  int width, height;
 
   i_clear_error();
 
@@ -31,12 +34,41 @@ imss_win32(unsigned hwnd_u, int include_decor) {
     return NULL;
   }
 
-  width = rect.right - rect.left;
-  height = rect.bottom - rect.top;
+  window_width = rect.right - rect.left;
+  window_height = rect.bottom - rect.top;
+
+  /* adjust negative/zero values to window size */
+  if (left < 0)
+    left += window_width;
+  if (top < 0)
+    top += window_height;
+  if (right <= 0)
+    right += window_width;
+  if (bottom <= 0)
+    bottom += window_height;
+  
+  /* clamp */
+  if (left < 0)
+    left = 0;
+  if (right > window_width)
+    right = window_width;
+  if (top < 0)
+    top = 0;
+  if (bottom > window_height)
+    bottom = window_height;
+
+  /* validate */
+  if (right <= left || bottom <= top) {
+    i_push_error(0, "image would be empty");
+    return NULL;
+  }
+  width = right - left;
+  height = bottom - top;
+
   work_bmp = CreateCompatibleBitmap(wdc, width, height);
   bmdc = CreateCompatibleDC(wdc);
   old_dc_bmp = SelectObject(bmdc, work_bmp);
-  BitBlt(bmdc, 0, 0, width, height, wdc, 0, 0, SRCCOPY);
+  BitBlt(bmdc, 0, 0, width, height, wdc, left, top, SRCCOPY);
 
   /* make a dib */
   memset(&bmi, 0, sizeof(bmi));

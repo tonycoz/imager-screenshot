@@ -1,5 +1,7 @@
 #include "imext.h"
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include "imss.h"
 
 static
 int
@@ -8,10 +10,13 @@ my_handler(Display *display, XErrorEvent *error) {
 
   XGetErrorText(display, error->error_code, buffer, sizeof(buffer));
   i_push_error(error->error_code, buffer);
+
+  return 0;
 }
 
 i_img *
-imss_x11(unsigned long display_ul, unsigned long window_id) {
+imss_x11(unsigned long display_ul, int window_id,
+	 int left, int top, int right, int bottom) {
   Display *display = (Display *)display_ul;
   int own_display = 0; /* non-zero if we connect */
   GC gc;
@@ -22,6 +27,7 @@ imss_x11(unsigned long display_ul, unsigned long window_id) {
   int x, y;
   XColor *colors;
   XErrorHandler old_handler;
+  int width, height;
 
   i_clear_error();
 
@@ -51,7 +57,37 @@ imss_x11(unsigned long display_ul, unsigned long window_id) {
     return NULL;
   }
 
-  image = XGetImage(display, window_id, 0, 0, attr.width, attr.height,
+  /* adjust negative/zero values to window size */
+  if (left < 0)
+    left += attr.width;
+  if (top < 0)
+    top += attr.height;
+  if (right <= 0)
+    right += attr.width;
+  if (bottom <= 0)
+    bottom += attr.height;
+  
+  /* clamp */
+  if (left < 0)
+    left = 0;
+  if (right > attr.width)
+    right = attr.width;
+  if (top < 0)
+    top = 0;
+  if (bottom > attr.height)
+    bottom = attr.height;
+
+  /* validate */
+  if (right <= left || bottom <= top) {
+    XSetErrorHandler(old_handler);
+    if (own_display)
+      XCloseDisplay(display);
+    i_push_error(0, "image would be empty");
+    return NULL;
+  }
+  width = right - left;
+  height = bottom - top;
+  image = XGetImage(display, window_id, left, top, width, height,
                     -1, ZPixmap);
   if (!image) {
     XSetErrorHandler(old_handler);
@@ -61,24 +97,24 @@ imss_x11(unsigned long display_ul, unsigned long window_id) {
     return NULL;
   }
 
-  result = i_img_8_new(attr.width, attr.height, 3);
-  line = mymalloc(sizeof(i_color) * attr.width);
-  colors = mymalloc(sizeof(XColor) * attr.width);
-  for (y = 0; y < attr.height; ++y) {
+  result = i_img_8_new(width, height, 3);
+  line = mymalloc(sizeof(i_color) * width);
+  colors = mymalloc(sizeof(XColor) * width);
+  for (y = 0; y < height; ++y) {
     cp = line;
     /* XQueryColors seems to be a round-trip, so do one big request
        instead of one per pixel */
-    for (x = 0; x < attr.width; ++x) {
+    for (x = 0; x < width; ++x) {
       colors[x].pixel = XGetPixel(image, x, y);
     }
-    XQueryColors(display, attr.colormap, colors, attr.width);
-    for (x = 0; x < attr.width; ++x) {
+    XQueryColors(display, attr.colormap, colors, width);
+    for (x = 0; x < width; ++x) {
       cp->rgb.r = colors[x].red >> 8;
       cp->rgb.g = colors[x].green >> 8;
       cp->rgb.b = colors[x].blue >> 8;
       ++cp;
     }
-    i_plin(result, 0, attr.width, y, line);
+    i_plin(result, 0, width, y, line);
   }
   myfree(line);
   myfree(colors);
