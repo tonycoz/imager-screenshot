@@ -19,7 +19,6 @@ imss_x11(unsigned long display_ul, int window_id,
 	 int left, int top, int right, int bottom) {
   Display *display = (Display *)display_ul;
   int own_display = 0; /* non-zero if we connect */
-  GC gc;
   XImage *image;
   XWindowAttributes attr;
   i_img *result;
@@ -46,7 +45,7 @@ imss_x11(unsigned long display_ul, int window_id,
 
   if (!window_id) {
     int screen = DefaultScreen(display);
-    window_id = RootWindow(display, 0);
+    window_id = RootWindow(display, screen);
   }
 
   if (!XGetWindowAttributes(display, window_id, &attr)) {
@@ -123,6 +122,12 @@ imss_x11(unsigned long display_ul, int window_id,
   XSetErrorHandler(old_handler);
   if (own_display)
     XCloseDisplay(display);
+
+  i_tags_setn(&result->tags, "ss_window_width", attr.width);
+  i_tags_setn(&result->tags, "ss_window_height", attr.height);
+  i_tags_set(&result->tags, "ss_type", "X11", 3);
+  i_tags_setn(&result->tags, "ss_left", left);
+  i_tags_setn(&result->tags, "ss_top", top);
 
   return result;
 }

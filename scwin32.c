@@ -101,6 +101,12 @@ imss_win32(unsigned hwnd_u, int include_decor, int left, int top,
     myfree(line);
   }
 
+  i_tags_setn(&result->tags, "ss_window_width", window_width);
+  i_tags_setn(&result->tags, "ss_window_height", window_height);
+  i_tags_set(&result->tags, "ss_type", "Win32", 5);
+  i_tags_setn(&result->tags, "ss_left", left);
+  i_tags_setn(&result->tags, "ss_top", top);
+
   /* clean up */
   myfree(di_bits);
   SelectObject(bmdc, old_dc_bmp);

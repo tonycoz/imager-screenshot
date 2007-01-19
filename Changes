@@ -1,4 +1,6 @@
 0.004
+	- set tags in the resulting image
+	- remove an unused variable
 	- add support for getting a subimage of the window
 	- include the interface header in the implementations so we
 	  get errors when they don't match (doh!)
