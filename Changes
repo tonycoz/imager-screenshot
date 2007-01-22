@@ -1,4 +1,7 @@
 0.004
+	- t/30tkx11.t now provides a default gemoetry to prevent
+	  a wait for window placement on window managers that do that
+	  (like TWM - RT #24445)
 	- set tags in the resulting image
 	- remove an unused variable
 	- add support for getting a subimage of the window

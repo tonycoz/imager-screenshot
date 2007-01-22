@@ -23,6 +23,8 @@ $mw->can('windowingsystem')
 $mw->windowingsystem eq 'x11'
   or plan skip_all => 'Tk windowing system not X11';
 
+eval { $mw->geometry('+10+10'); };
+
 plan tests => 1;
 
 my $im;
