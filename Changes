@@ -1,4 +1,5 @@
-0.004
+0.004 23 Jan 2007
+	- 0.004 release
 	- add ppport.h for 5.005_03 support
 	- t/30tkx11.t now provides a default gemoetry to prevent
 	  a wait for window placement on window managers that do that
