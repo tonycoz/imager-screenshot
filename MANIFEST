@@ -5,6 +5,7 @@ Makefile.PL			Build script
 MANIFEST			This list of files
 MANIFEST.SKIP			Files not to include in the MANIFEST
 META.yml			Module meta-data (added by MakeMaker)
+ppport.h			Support older perls
 README
 Screenshot.pm			Main perl implementation
 Screenshot.xs			Interface to C code
