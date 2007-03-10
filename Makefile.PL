@@ -28,7 +28,7 @@ if (find_header('windows.h') and find_lib('gdi32')) {
 }
 
 unless (@objs > 1) {
-  die "Sorry, I can't find headers or libraries for a supported GUI\n"
+  die "NA: Sorry, I can't find headers or libraries for a supported GUI\n"
 }
 
 my %opts = 
