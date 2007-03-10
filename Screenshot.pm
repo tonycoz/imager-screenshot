@@ -94,8 +94,10 @@ sub screenshot {
     Imager->_set_error(Imager->_error_as_msg());
     return;
   }
-  
-  return $result;
+
+  # RT #24992 - the Imager typemap entry is broken pre-0.56, so
+  # wrap it here
+  return bless { IMG => $result }, "Imager";
 }
 
 sub have_win32 {

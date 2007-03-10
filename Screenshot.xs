@@ -16,7 +16,7 @@ PROTOTYPES: DISABLE
 
 #ifdef SS_WIN32
 
-Imager
+Imager::ImgRaw
 imss_win32(hwnd, include_decor = 0, left = 0, top = 0, right = 0, bottom = 0)
 	unsigned hwnd
 	int include_decor
@@ -29,7 +29,7 @@ imss_win32(hwnd, include_decor = 0, left = 0, top = 0, right = 0, bottom = 0)
 
 #ifdef SS_X11
 
-Imager
+Imager::ImgRaw
 imss_x11(display, window_id, left = 0, top = 0, right = 0, bottom = 0)
         unsigned long display
 	int window_id
