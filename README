@@ -3,8 +3,10 @@ X11 or Win32.
 
 Requires:
   Imager 0.54 or later.
-  SDK header files and libraries for Win32 support
-  X11 header files and libraries for X11 support.
+  Either:
+    SDK header files and libraries for Win32 support
+  and/or
+    X11 header files and libraries for X11 support.
   A C compiler compatible with that used to build perl itself.
 
 Optional:

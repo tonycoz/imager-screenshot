@@ -1,3 +1,10 @@
+0.005
+	- added a TODO section to the POD
+	- include NA in the die output from Makefile.PL if we can't
+	  find supported GUI libraries/headers (RT #24486)
+	- screenshot() no longer leaks image objects caused by the Imager
+	  typemap bug (RT #24992)
+
 0.004 23 Jan 2007
 	- 0.004 release
 	- add ppport.h for 5.005_03 support
