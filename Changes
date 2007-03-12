@@ -1,4 +1,5 @@
-0.005
+0.005 12 Mar 2007
+	- 0.005 release
 	- added a TODO section to the POD
 	- include NA in the die output from Makefile.PL if we can't
 	  find supported GUI libraries/headers (RT #24486)
