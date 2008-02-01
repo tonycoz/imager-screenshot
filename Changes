@@ -1,3 +1,10 @@
+0.006 unreleased
+	- screenshot() on a non-toplevel Tk widget would crash when
+	  calling the frame method.  Since this call appears to be
+	  unnecessary I've removed it, and plan to run tests on a few
+	  platforms to check I haven't broken anything.
+          RT #32843 - thanks to Slaven Rezic.
+
 0.005 12 Mar 2007
 	- 0.005 release
 	- added a TODO section to the POD

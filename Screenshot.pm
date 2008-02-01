@@ -69,8 +69,6 @@ sub screenshot {
       }
 
       my $id_hex = $opts{widget}->id;
-      $opts{widget}->can('frame') 
-        and $id_hex = $opts{widget}->frame;
       
       # is there a way to get the display pointer from Tk?
       $result = _x11($opts{display}, hex($id_hex), $opts{left}, $opts{top},

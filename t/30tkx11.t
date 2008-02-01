@@ -25,15 +25,18 @@ $mw->windowingsystem eq 'x11'
 
 eval { $mw->geometry('+10+10'); };
 
-plan tests => 1;
+plan tests => 2;
 
-my $im;
-$mw->Label(-text => "test: $0")->pack;
+my ($im_mw, $im_label);
+my $label = $mw->Label(-text => "test: $0")->pack;
 $mw->after(100 =>
            sub {
-             $im = screenshot(widget => $mw, decor => 1)
-               or print "# ", Imager->errstr, "\n";
+             $im_mw = screenshot(widget => $mw, decor => 1)
+               or print "# mw: ", Imager->errstr, "\n";
+	     $im_label = screenshot(widget => $label)
+	       or print "# label: ", Imager->errstr, "\n";
              $mw->destroy;
            });
 MainLoop();
-ok($im, "grab from a Tk widget (X11)");
+ok($im_mw, "grab from a Tk widget (X11)");
+ok($im_label, "grab label from a Tk widget (X11)");
