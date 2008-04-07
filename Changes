@@ -13,6 +13,9 @@
 - added --incpath and --libpath options to Makefile.PL and also look
   in $ENV{IM_INCPATH} and $ENV{IM_LIBPATH} like Imager.
 
+- document the widget parameter
+  https://rt.cpan.org/Ticket/Display.html?id=32855
+
 0.005 12 Mar 2007
 	- 0.005 release
 	- added a TODO section to the POD

@@ -182,9 +182,22 @@ the display specified by $ENV{DISPLAY}.
 
 Note: taking a screenshot of a remote display is slow.
 
+=item screenshot widget => I<widget>
+
+=item screenshot widget => I<widget>, display => I<display>
+
+=item screenshot widget => I<widget>, decor => I<capture decorations>
+
+Retrieve a screenshot of a Tk widget, under Win32 or X11, depending on
+how Tk has been built.
+
+If Tk was built for X11 then the display parameter applies.
+
+If Tk was built for Win32 then the decor parameter applies.
+
 =item screenshot
 
-If no C<id> or C<hwnd> parameter is supplied:
+If no C<id>, C<hwnd> or C<widget> parameter is supplied:
 
 =over
 
