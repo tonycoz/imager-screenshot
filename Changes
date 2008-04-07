@@ -1,9 +1,17 @@
 0.006 unreleased
-	- screenshot() on a non-toplevel Tk widget would crash when
-	  calling the frame method.  Since this call appears to be
-	  unnecessary I've removed it, and plan to run tests on a few
-	  platforms to check I haven't broken anything.
-          RT #32843 - thanks to Slaven Rezic.
+
+- screenshot() on a non-toplevel Tk widget would crash when
+  calling the frame method.  Since this call appears to be
+  unnecessary I've removed it, and plan to run tests on a few
+  platforms to check I haven't broken anything.
+  RT #32843 - thanks to Slaven Rezic.
+
+- improved the error messages displayed when headers and libraries
+  can't be found
+  http://rt.cpan.org/Ticket/Display.html?id=32856
+
+- added --incpath and --libpath options to Makefile.PL and also look
+  in $ENV{IM_INCPATH} and $ENV{IM_LIBPATH} like Imager.
 
 0.005 12 Mar 2007
 	- 0.005 release
