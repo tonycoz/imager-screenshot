@@ -1,4 +1,4 @@
-0.006 unreleased
+0.006 9 Apr 2008
 
 - screenshot() on a non-toplevel Tk widget would crash when
   calling the frame method.  Since this call appears to be
