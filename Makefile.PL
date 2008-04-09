@@ -159,11 +159,16 @@ sub find_lib {
   my $libname;
   if ($^O eq 'MSWin32' && $Config{_a} eq '.lib') {
     $libname = $name . $Config{_a};
+    @found = _find_file($libname, library_search_path());
   }
   else {
     $libname = "lib" . $name . $Config{_a};
+    @found = _find_file($libname, library_search_path());
+    if (!@found && $Config{so}) {
+      $libname = "lib" . $name . "." . $Config{so};
+      @found = _find_file($libname, library_search_path());
+    }
   }
-  @found = _find_file($libname, library_search_path());
   if (@found) {
     push @lflags, "-L$_" for grep !$seen_libdir{$_}, @found;
     @seen_libdir{@found} = (1) x @found;
