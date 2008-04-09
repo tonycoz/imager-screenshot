@@ -47,14 +47,6 @@ For X11: X11 headers and libraries, eg. the libX11-dev package on Debian
 DEAD
 }
 
-my $extra_meta = <<META;
-configure_requires:
-  Imager: 0.54
-build_requires:
-  Imager: 0.54
-  Test::More: 0.47
-META
-
 my %opts = 
   (
    NAME => 'Imager::Screenshot',
@@ -65,7 +57,6 @@ my %opts =
 		},
    INC => Imager::ExtUtils->includes,
    TYPEMAPS => [ Imager::ExtUtils->typemap ],
-   EXTRA_META => $extra_meta,
   );
 
 $opts{LIBS} = "@lflags" if @lflags;
@@ -81,8 +72,16 @@ if ($eu_mm_version > 6.06) {
 # LICENSE was introduced in 6.30_01, but Debian etch includes
 # (as of 2007/01/12) an ExtUtils::MakeMaker versioned 6.30_01 without
 # LICENSE support
+# EXTRA_META was also introduced in 6.30_01
 if ($eu_mm_version > 6.3001) {
   $opts{LICENSE} = 'perl';
+  $opts{EXTRA_META} = <<META;
+configure_requires:
+  Imager: 0.54
+build_requires:
+  Imager: 0.54
+  Test::More: 0.47
+META
 }
 
 WriteMakefile(%opts);

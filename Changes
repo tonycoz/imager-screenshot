@@ -16,6 +16,14 @@
 - document the widget parameter
   https://rt.cpan.org/Ticket/Display.html?id=32855
 
+- document that overlapping windows will show in a captured image.
+  http://rt.cpan.org/Ticket/Display.html?id=32842
+
+- add appropriate configure_requires and build_requires to META.yml
+  so that automated testers will install those pre-requisites early
+  enough.
+  http://rt.cpan.org/Ticket/Display.html?id=29560
+
 0.005 12 Mar 2007
 	- 0.005 release
 	- added a TODO section to the POD
