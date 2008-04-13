@@ -38,8 +38,9 @@ if (find_header('windows.h', "Win32 header")
 
 unless (@objs > 1) {
   die <<DEAD;
+OS unsupported: Headers or libraries not found for a supported GUI
 
-NA: Sorry, I can't find headers or libraries for a supported GUI
+Sorry, I can't find headers or libraries for a supported GUI
 You need to install development headers and libraries for your GUI
 For Win32: Platform SDK or a substitute
 For X11: X11 headers and libraries, eg. the libX11-dev package on Debian

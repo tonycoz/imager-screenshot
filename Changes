@@ -6,6 +6,10 @@
   Thanks to Slaven Rezic.
   https://rt.cpan.org/Ticket/Display.html?id=34792
 
+- die with a message automated cpan testers treat as a non-fail when
+  we can't find the needed headers and libraries.
+  https://rt.cpan.org/Ticket/Display.html?id=34845
+
 0.006 9 Apr 2008
 
 - screenshot() on a non-toplevel Tk widget would crash when
