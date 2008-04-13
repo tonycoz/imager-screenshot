@@ -1,4 +1,4 @@
-0.007 unreleased
+0.007 13 Apr 2008
 
 - wait for the widget to be displayed before doing the delay that
   takes the screenshot.  This forces the widget to be displayed on
