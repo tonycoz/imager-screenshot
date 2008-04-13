@@ -29,6 +29,7 @@ plan tests => 2;
 
 my ($im_mw, $im_label);
 my $label = $mw->Label(-text => "test: $0")->pack;
+$label->waitVisibility;
 $mw->after(100 =>
            sub {
              $im_mw = screenshot(widget => $mw, decor => 1)

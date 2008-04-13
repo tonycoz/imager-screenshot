@@ -1,3 +1,11 @@
+0.007 unreleased
+
+- wait for the widget to be displayed before doing the delay that
+  takes the screenshot.  This forces the widget to be displayed on
+  loaded machines.
+  Thanks to Slaven Rezic.
+  https://rt.cpan.org/Ticket/Display.html?id=34792
+
 0.006 9 Apr 2008
 
 - screenshot() on a non-toplevel Tk widget would crash when
