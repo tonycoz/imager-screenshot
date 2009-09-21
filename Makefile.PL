@@ -76,13 +76,20 @@ if ($eu_mm_version > 6.06) {
 # EXTRA_META was also introduced in 6.30_01
 if ($eu_mm_version > 6.3001) {
   $opts{LICENSE} = 'perl';
-  $opts{EXTRA_META} = <<META;
-configure_requires:
-  Imager: 0.54
-build_requires:
-  Imager: 0.54
-  Test::More: 0.47
-META
+}
+if ($eu_mm_version >= 6.46) {
+  $opts{META_MERGE} =
+    {
+     configure_requires => 
+     {
+      Imager => "0.54"
+     },
+     build_requires => 
+     {
+      Imager => "0.54",
+      "Test::More" => "0.47",
+     }
+    };
 }
 
 WriteMakefile(%opts);
