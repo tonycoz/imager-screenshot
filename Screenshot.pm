@@ -255,6 +255,11 @@ So setting all 4 values to 0 retrieves the whole window.
   # 10x10 pixel at the bottom right corner
   my $bott_right_10 = screenshot(left => -10, top => -10, ...);
 
+If screenshot() fails, it will return nothing, and the cause of the
+failure can be retrieved via Imager->errstr, so typical use could be:
+
+  my $img = screenshot(...) or die Imager->errstr;
+
 =item have_win32
 
 Returns true if Win32 support is available.
