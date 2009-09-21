@@ -1,3 +1,11 @@
+0.008 21 Sep 2009
+
+- document that screenshot() returns nothing on failure and the cause
+  can be found with Imager->errstr
+  https://rt.cpan.org/Ticket/Display.html?id=46933
+
+- use META_MERGE instead of EXTRA_META to set configure/build_requires
+
 0.007 13 Apr 2008
 
 - wait for the widget to be displayed before doing the delay that
