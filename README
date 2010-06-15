@@ -30,3 +30,5 @@ Tested under:
 License:
 
 Imager::Screenshot is distributed under the same terms as perl itself.
+
+Warning: make test on X11 over a remote connection will be slow.
