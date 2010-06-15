@@ -15,3 +15,4 @@ vc60\.pdb
 ^Imager-Screenshot-.*/
 ^dll\.exp$
 ^dll\.base$
+\#

@@ -6,6 +6,8 @@ use Imager::ExtUtils;
 use Config;
 use File::Spec;
 use Getopt::Long;
+use lib "inc";
+use Devel::CheckLib;
 
 my @incpaths; # places to look for headers
 my @libpaths; # places to look for libraries
@@ -27,7 +29,10 @@ if (find_header("X11/Xlib.h", "X11 header")
   print "Found X11\n";
 }
 if (find_header('windows.h', "Win32 header")
-    and find_lib('gdi32', "Win32 library")) {
+    && find_lib('gdi32', "Win32 library")
+    || check_lib(header => "windows.h",
+		 lib => "gdi32",
+		 title => "Win32")) {
   push @objs, 'scwin32.o';
   push @cflags, '-DSS_WIN32';
   if ($^O eq 'cygwin') {
@@ -186,4 +191,14 @@ sub find_lib {
   }
 
   @found;
+}
+
+# wrapper around assert lib that doesn't exit and doesn't die
+sub check_lib {
+  my (%opts) = @_;
+
+  my $title = delete $opts{title};
+  $title and print "Looking even harder for $title\n";
+
+  return eval { assert_lib(%opts); 1 };
 }

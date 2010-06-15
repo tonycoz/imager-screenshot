@@ -1,6 +1,7 @@
 Changes				History
 examples/win32_fw.pl		Example - get a window by name on win32 and grab it
 imss.h				Declarations of the functions the XS gives access to
+inc/Devel/CheckLib.pm
 Makefile.PL			Build script
 MANIFEST			This list of files
 MANIFEST.SKIP			Files not to include in the MANIFEST
