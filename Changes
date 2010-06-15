@@ -1,3 +1,9 @@
+0.009 15 Jun 2010
+
+- check for Win32 support with Devel::CheckLib if we don't find them
+  otherwise.
+  https://rt.cpan.org/Ticket/Display.html?id=56793
+
 0.008 21 Sep 2009
 
 - document that screenshot() returns nothing on failure and the cause
