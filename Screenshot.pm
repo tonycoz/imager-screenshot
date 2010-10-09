@@ -83,7 +83,9 @@ sub screenshot {
     $result =
       defined &_win32 ? _win32(0, $opts{decor}, $opts{left}, $opts{top},
 			       $opts{right}, $opts{bottom}) :
-	defined &_x11 ? _x11($opts{display}, 0, $opts{left}, $opts{top},
+      defined &_darwin ? _darwin($opts{left}, $opts{top},
+				 $opts{right}, $opts{bottom}) :
+      defined &_x11 ? _x11($opts{display}, 0, $opts{left}, $opts{top},
 			     $opts{right}, $opts{bottom}) :
 	   die "No drivers enabled\n";
   }

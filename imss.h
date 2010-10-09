@@ -12,4 +12,7 @@ imss_x11_open(char const *display_name);
 extern void
 imss_x11_close(unsigned long display);
 
+extern i_img *
+imss_darwin(i_img_dim left, i_img_dim top, i_img_dim right, i_img_dim bottom);
+
 #endif

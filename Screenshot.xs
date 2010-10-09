@@ -48,5 +48,16 @@ imss_x11_close(display)
 
 #endif
 
+#ifdef SS_DARWIN
+
+Imager::ImgRaw
+imss_darwin(left = 0, top = 0, right = 0, bottom = 0)
+	int left
+	int top
+	int right
+	int bottom
+
+#endif
+
 BOOT:
 	PERL_INITIALIZE_IMAGER_CALLBACKS;
