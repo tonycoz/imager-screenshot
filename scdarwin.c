@@ -32,6 +32,10 @@ imss_darwin(i_img_dim left, i_img_dim top, i_img_dim right, i_img_dim bottom) {
   i_clear_error();
 
   disp = CGMainDisplayID();
+  if (!disp) {
+    i_push_error(0, "No main display");
+    return NULL;
+  }
   
   /* for now, only interested in the first display */
   rect = CGDisplayBounds(disp);
@@ -75,7 +79,7 @@ imss_darwin(i_img_dim left, i_img_dim top, i_img_dim right, i_img_dim bottom) {
     return NULL;
   }
   if (!npix) {
-    i_push_error(0, "No pixel format found");
+    i_push_error(0, "No pixel format found - hidden display?");
     return NULL;
   }
 
@@ -112,7 +116,7 @@ imss_darwin(i_img_dim left, i_img_dim top, i_img_dim right, i_img_dim bottom) {
 
     glReadBuffer(GL_FRONT);
     glReadPixels(left, screen_height - top - height, width, height,
-		 GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buf);
+		 GL_RGBA, GL_UNSIGNED_BYTE, buf);
 
     /* transfer */
     while (y >= 0) {
@@ -122,6 +126,12 @@ imss_darwin(i_img_dim left, i_img_dim top, i_img_dim right, i_img_dim bottom) {
     }
     
     free(buf);
+
+    i_tags_setn(&im->tags, "ss_window_width", width);
+    i_tags_setn(&im->tags, "ss_window_height", height);
+    i_tags_set(&im->tags, "ss_type", "Darwin", 6);
+    i_tags_setn(&im->tags, "ss_left", left);
+    i_tags_setn(&im->tags, "ss_top", top);
   }
 
   /* clean up */

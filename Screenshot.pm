@@ -50,6 +50,11 @@ sub screenshot {
     $result = _x11($opts{display}, $opts{id}, $opts{left}, $opts{top},
 		   $opts{right}, $opts{bottom});
   }
+  elsif (defined $opts{darwin}) { # as long as it's there
+    defined &_darwin
+      or die "Darwin driver not enabled\n";
+    $result = _darwin($opts{left}, $opts{top}, $opts{right}, $opts{bottom});
+  }
   elsif ($opts{widget}) {
     # Perl/Tk widget
     my $top = $opts{widget}->toplevel;
@@ -108,6 +113,10 @@ sub have_x11 {
   defined &_x11;
 }
 
+sub have_darwin {
+  defined &_darwin;
+}
+
 sub x11_open {
   my $display = _x11_open(@_);
   unless ($display) {
@@ -153,6 +162,9 @@ Imager::Screenshot - screenshot to an Imager image
   # test for x11 support
   if (Imager::Screenshot->have_x11) { ... }
   
+  # test for Darwin (Mac OS X) support
+  if (Imager::Screenshot->have_darwin) { ... }
+  
 
 =head1 DESCRIPTION
 
@@ -184,6 +196,20 @@ the display specified by $ENV{DISPLAY}.
 
 Note: taking a screenshot of a remote display is slow.
 
+=item screenshot darwin => 0
+
+Retrieve a screenshot under Mac OS X.  The only supported value for
+the C<darwin> parameter is C<0>.
+
+For a screen capture to be taken, the current user using
+Imager:Screenshot must be the currently logged in user on the display.
+
+If you're using fast user switching, the current user must be the
+active user.
+
+Note: this means you can ssh into a Mac OS X box and screenshot from
+the ssh session, if you're the current user on the display.
+
 =item screenshot widget => I<widget>
 
 =item screenshot widget => I<widget>, display => I<display>
@@ -206,6 +232,10 @@ If no C<id>, C<hwnd> or C<widget> parameter is supplied:
 =item *
 
 if Win32 support is compiled, return screenshot(hwnd => 0).
+
+=item *
+
+if Darwin support is compiled, return screenshot(darwin => 0).
 
 =item *
 
@@ -270,6 +300,10 @@ Returns true if Win32 support is available.
 
 Returns true if X11 support is available.
 
+=item have_darwin
+
+Returns true if Darwin support is available.
+
 =item Imager::Screenshot::x11_open
 
 =item Imager::Screenshot::x11_open I<display name>
@@ -328,8 +362,12 @@ It's possible to have more than one grab driver available, for
 example, Win32 and X11, and which is used can have an effect on the
 result.
 
-Under Win32, if there's a screesaver running, then you grab the
-results of the screensaver.
+Under Win32 or OS X, if there's a screesaver running, then you grab
+the results of the screensaver.
+
+On OS X, you can grab the display from an ssh session as long as the
+ssh session is under the same user as the currently active user on the
+display.
 
 Grabbing the root window on a rootless server (eg. Cygwin/X) may not
 grab the background that you see.  In fact, when I tested under
@@ -352,12 +390,6 @@ Imager::Screenshot is licensed under the same terms as Perl itself.
 Future plans include:
 
 =over
-
-=item *
-
-OS X support - I need to find out which APIs to use to do this.  I
-found some information on the APIs used for this, but don't have a Mac
-I can test on.
 
 =item *
 

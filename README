@@ -7,6 +7,8 @@ Requires:
     SDK header files and libraries for Win32 support
   and/or
     X11 header files and libraries for X11 support.
+  and/or
+    OS X header files and libraries (supplied with Xcode)
   A C compiler compatible with that used to build perl itself.
 
 Optional:
@@ -26,6 +28,7 @@ Tested under:
  - Win32 (mingw)
  - Win32/X11 (cygwin as of Jan 1 2007)
  - X11 (Debian Linux)
+ - Mac OS X 10.6.4.
 
 License:
 

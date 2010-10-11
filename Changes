@@ -1,3 +1,9 @@
+0.009_001
+
+- add Darwin (Apple Mac OS X) support
+
+- test release to see how broken it is
+
 0.009 15 Jun 2010
 
 - check for Win32 support with Devel::CheckLib if we don't find them

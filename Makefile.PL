@@ -43,6 +43,7 @@ if (find_header('windows.h', "Win32 header")
 }
 
 if ($^O eq "darwin") {
+  # this test is overly simple
   push @objs, "scdarwin.o";
   push @cflags, "-DSS_DARWIN";
   push @lddlflags, qw/-framework OpenGL -framework Cocoa/;
@@ -68,7 +69,7 @@ my %opts =
    VERSION_FROM => 'Screenshot.pm',
    OBJECT => "@objs",
    PREREQ_PM => {
-		 'Imager'    => 0.54,
+		 'Imager'    => 0.69,
 		},
    INC => Imager::ExtUtils->includes,
    TYPEMAPS => [ Imager::ExtUtils->typemap ],
@@ -81,7 +82,7 @@ if (@lddlflags) {
   $opts{LDDLFLAGS} = $Config{lddlflags} . " @lddlflags";
 }
 
-# avoid "... isn't numberic in numeric gt ..." warnings for dev versions
+# avoid "... isn't numeric in numeric gt ..." warnings for dev versions
 my $eu_mm_version = eval $ExtUtils::MakeMaker::VERSION;
 if ($eu_mm_version > 6.06) {
   $opts{AUTHOR} = 'Tony Cook <tonyc@cpan.org>';
@@ -100,11 +101,11 @@ if ($eu_mm_version >= 6.46) {
     {
      configure_requires => 
      {
-      Imager => "0.54"
+      Imager => "0.69"
      },
      build_requires => 
      {
-      Imager => "0.54",
+      Imager => "0.69",
       "Test::More" => "0.47",
      }
     };
