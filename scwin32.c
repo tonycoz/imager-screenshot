@@ -39,7 +39,6 @@ imss_win32(unsigned hwnd_u, int include_decor, int left, int top,
   }
   else {
     if (display == -1) {
-      fprintf(stderr, "all desktops\n");
       cdc = CreateDC("DISPLAY", NULL, NULL, NULL);
       orig_x = GetSystemMetrics(SM_XVIRTUALSCREEN);
       orig_y = GetSystemMetrics(SM_YVIRTUALSCREEN);
@@ -51,8 +50,13 @@ imss_win32(unsigned hwnd_u, int include_decor, int left, int top,
       dd.cb = sizeof(dd);
 
       if (EnumDisplayDevices(NULL, display, &dd, 0)) {
-	fprintf(stderr, "found %d ->  %s\n", display, dd.DeviceName);
-	cdc = CreateDC(dd.DeviceName, dd.DeviceName, NULL, NULL);
+	if (dd.StateFlags & DISPLAY_DEVICE_ACTIVE) {
+	  cdc = CreateDC(dd.DeviceName, dd.DeviceName, NULL, NULL);
+	}
+	else {
+	  i_push_errorf(0, "Display device %d not active", display);
+	  return NULL;
+	}
       }
       else {
 	i_push_errorf(0, "Cannot enumerate device %d: %ld", display, (long)GetLastError());
@@ -89,6 +93,10 @@ imss_win32(unsigned hwnd_u, int include_decor, int left, int top,
   /* validate */
   if (right <= left || bottom <= top) {
     i_push_error(0, "image would be empty");
+    if (cdc)
+      DeleteDC(cdc);
+    else
+      ReleaseDC(hwnd, wdc);
     return NULL;
   }
   width = right - left;
@@ -110,24 +118,26 @@ imss_win32(unsigned hwnd_u, int include_decor, int left, int top,
 
   di_bits = mymalloc(4 * width * height);
   if (GetDIBits(bmdc, work_bmp, 0, height, di_bits, &bmi, DIB_RGB_COLORS)) {
-    i_color *line = mymalloc(sizeof(i_color) * width);
-    i_color *cp;
-    int x, y;
-    unsigned char *ch_pp = di_bits;
     result = i_img_8_new(width, height, 3);
 
-    for (y = 0; y < height; ++y) {
-      cp = line;
-      for (x = 0; x < width; ++x) {
-	cp->rgb.b = *ch_pp++;
-	cp->rgb.g = *ch_pp++;
-	cp->rgb.r = *ch_pp++;
-	ch_pp++;
-	cp++;
+    if (result) {
+      i_color *line = mymalloc(sizeof(i_color) * width);
+      i_color *cp;
+      int x, y;
+      unsigned char *ch_pp = di_bits;
+      for (y = 0; y < height; ++y) {
+	cp = line;
+	for (x = 0; x < width; ++x) {
+	  cp->rgb.b = *ch_pp++;
+	  cp->rgb.g = *ch_pp++;
+	  cp->rgb.r = *ch_pp++;
+	  ch_pp++;
+	  cp++;
+	}
+	i_plin(result, 0, width, y, line);
       }
-      i_plin(result, 0, width, y, line);
+      myfree(line);
     }
-    myfree(line);
   }
 
   i_tags_setn(&result->tags, "ss_window_width", window_width);
