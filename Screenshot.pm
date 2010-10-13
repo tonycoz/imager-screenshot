@@ -42,9 +42,10 @@ sub screenshot {
     defined &_win32
       or die "Win32 driver not enabled\n";
     $result = _win32($opts{hwnd}, $opts{decor}, $opts{left}, $opts{top},
-		     $opts{right}, $opts{bottom});
+		     $opts{right}, $opts{bottom}, $opts{display});
   }
   elsif (defined $opts{id}) { # X11 window id
+    exists $opts{display} or $opts{display} = 0;
     defined &_x11
       or die "X11 driver not enabled\n";
     $result = _x11($opts{display}, $opts{id}, $opts{left}, $opts{top},
@@ -87,7 +88,7 @@ sub screenshot {
   else {
     $result =
       defined &_win32 ? _win32(0, $opts{decor}, $opts{left}, $opts{top},
-			       $opts{right}, $opts{bottom}) :
+			       $opts{right}, $opts{bottom}, $opts{display}) :
       defined &_darwin ? _darwin($opts{left}, $opts{top},
 				 $opts{right}, $opts{bottom}) :
       defined &_x11 ? _x11($opts{display}, 0, $opts{left}, $opts{top},

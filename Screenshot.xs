@@ -17,13 +17,14 @@ PROTOTYPES: DISABLE
 #ifdef SS_WIN32
 
 Imager::ImgRaw
-imss_win32(hwnd, include_decor = 0, left = 0, top = 0, right = 0, bottom = 0)
+imss_win32(hwnd, include_decor = 0, left = 0, top = 0, right = 0, bottom = 0, display = 0)
 	unsigned hwnd
 	int include_decor
 	int left
 	int top
 	int right
 	int bottom
+	int display
 
 #endif
 

@@ -5,11 +5,12 @@
 
 i_img *
 imss_win32(unsigned hwnd_u, int include_decor, int left, int top, 
-	   int right, int bottom) {
+	   int right, int bottom, int display) {
   HWND hwnd = (HWND)hwnd_u;
-  HDC wdc, bmdc;
-  RECT rect;
+  HDC cdc = 0, wdc, bmdc;
   HBITMAP work_bmp, old_dc_bmp;
+  int orig_x = 0;
+  int orig_y = 0;
   int window_width, window_height;
   BITMAPINFO bmi;
   unsigned char *di_bits;
@@ -18,24 +19,52 @@ imss_win32(unsigned hwnd_u, int include_decor, int left, int top,
 
   i_clear_error();
 
-  if (!hwnd)
-    hwnd = GetDesktopWindow();
+  if (hwnd) {
+    RECT rect;
+    if (include_decor) {
+      wdc = GetWindowDC(hwnd);
+      GetWindowRect(hwnd, &rect);
+    }
+    else {
+      wdc = GetDC(hwnd);
+      GetClientRect(hwnd, &rect);
+    }
+    if (!wdc) {
+      i_push_error(0, "Cannot get window DC - invalid hwnd?");
+      return NULL;
+    }
 
-  if (include_decor) {
-    wdc = GetWindowDC(hwnd);
-    GetWindowRect(hwnd, &rect);
+    window_width = rect.right - rect.left;
+    window_height = rect.bottom - rect.top;
   }
   else {
-    wdc = GetDC(hwnd);
-    GetClientRect(hwnd, &rect);
-  }
-  if (!wdc) {
-    i_push_error(0, "Cannot get window DC - invalid hwnd?");
-    return NULL;
-  }
+    if (display == -1) {
+      fprintf(stderr, "all desktops\n");
+      cdc = CreateDC("DISPLAY", NULL, NULL, NULL);
+      orig_x = GetSystemMetrics(SM_XVIRTUALSCREEN);
+      orig_y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+      window_width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+      window_height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+    }
+    else {
+      DISPLAY_DEVICE dd;
+      dd.cb = sizeof(dd);
 
-  window_width = rect.right - rect.left;
-  window_height = rect.bottom - rect.top;
+      if (EnumDisplayDevices(NULL, display, &dd, 0)) {
+	fprintf(stderr, "found %d ->  %s\n", display, dd.DeviceName);
+	cdc = CreateDC(dd.DeviceName, dd.DeviceName, NULL, NULL);
+      }
+      else {
+	i_push_errorf(0, "Cannot enumerate device %d: %ld", display, (long)GetLastError());
+	return NULL;
+      }
+
+      window_width = GetDeviceCaps(cdc, HORZRES);
+      window_height = GetDeviceCaps(cdc, VERTRES);
+    }
+
+    wdc = cdc;
+  }
 
   /* adjust negative/zero values to window size */
   if (left < 0)
@@ -68,7 +97,7 @@ imss_win32(unsigned hwnd_u, int include_decor, int left, int top,
   work_bmp = CreateCompatibleBitmap(wdc, width, height);
   bmdc = CreateCompatibleDC(wdc);
   old_dc_bmp = SelectObject(bmdc, work_bmp);
-  BitBlt(bmdc, 0, 0, width, height, wdc, left, top, SRCCOPY);
+  BitBlt(bmdc, 0, 0, width, height, wdc, orig_x + left, orig_y + top, SRCCOPY);
 
   /* make a dib */
   memset(&bmi, 0, sizeof(bmi));
@@ -112,7 +141,13 @@ imss_win32(unsigned hwnd_u, int include_decor, int left, int top,
   SelectObject(bmdc, old_dc_bmp);
   DeleteDC(bmdc);
   DeleteObject(work_bmp);
-  ReleaseDC(hwnd, wdc);
+
+  if (cdc) {
+    DeleteDC(cdc);
+  }
+  else {
+    ReleaseDC(hwnd, wdc);
+  }
 
   return result;
 }
