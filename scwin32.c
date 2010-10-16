@@ -139,6 +139,9 @@ imss_win32(unsigned hwnd_u, int include_decor, int left, int top,
       myfree(line);
     }
   }
+  else {
+    i_push_errorf(0, "GetDIBits() failure %d", (long)GetLastError());
+  }
 
   i_tags_setn(&result->tags, "ss_window_width", window_width);
   i_tags_setn(&result->tags, "ss_window_height", window_height);
