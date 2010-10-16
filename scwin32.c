@@ -8,9 +8,10 @@
 #define DISPLAY_DEVICE_ACTIVE 1
 #endif
 
-struct moniter_ctx {
+struct monitor_ctx {
   i_img *out;
   i_img_dim orig_x, orig_y;
+  int good;
 };
 
 static int
@@ -47,13 +48,14 @@ display_to_img(HDC dc, i_img *im, const RECT *src, int dest_x, int dest_y) {
     for (y = 0; y < height; ++y) {
       cp = line;
       for (x = 0; x < width; ++x) {
-	cp->rgb.b = *ch_pp++;
-	cp->rgb.g = *ch_pp++;
-	cp->rgb.r = *ch_pp++;
+	cp->rgba.b = *ch_pp++;
+	cp->rgba.g = *ch_pp++;
+	cp->rgba.r = *ch_pp++;
+	cp->rgba.a = 255;
 	ch_pp++;
 	cp++;
       }
-      i_plin(im, dest_x, width, dest_y + y, line);
+      i_plin(im, dest_x, dest_x+width, dest_y + y, line);
     }
     myfree(line);
     result = 1;
@@ -69,6 +71,19 @@ display_to_img(HDC dc, i_img *im, const RECT *src, int dest_x, int dest_y) {
 
   return result;
 }
+
+static BOOL CALLBACK
+monitor_enum(HMONITOR hmon, HDC dc, LPRECT r, LPARAM lp_ctx) {
+  struct monitor_ctx *ctx = (struct monitor_ctx *)lp_ctx;
+
+  if (!display_to_img(dc, ctx->out, r,
+		      r->left - ctx->orig_x, r->top - ctx->orig_y)) {
+    ctx->good = 0;
+  }
+
+  return ctx->good;
+}
+
 
 i_img *
 imss_win32(unsigned hwnd_u, int include_decor, int left, int top, 
@@ -178,16 +193,31 @@ imss_win32(unsigned hwnd_u, int include_decor, int left, int top,
     r.right = r.left + width;
     r.bottom = r.top + height;
     
-    if (display_to_img(wdc, result, &r, 0, 0)) {
+    if (display == -1) {
+      struct monitor_ctx ctx;
+      ctx.out = result;
+      ctx.orig_x = orig_x;
+      ctx.orig_y = orig_y;
+      ctx.good = 1;
+
+      if (!EnumDisplayMonitors(wdc, &r, monitor_enum, (LPARAM)&ctx)
+	  || !ctx.good) {
+	i_img_destroy(result);
+	result = NULL;
+      }
+    }
+    else {
+      if (!display_to_img(wdc, result, &r, 0, 0)) {
+	i_img_destroy(result);
+	result = NULL;
+      }
+    }
+    if (result) {
       i_tags_setn(&result->tags, "ss_window_width", window_width);
       i_tags_setn(&result->tags, "ss_window_height", window_height);
       i_tags_set(&result->tags, "ss_type", "Win32", 5);
       i_tags_setn(&result->tags, "ss_left", left);
       i_tags_setn(&result->tags, "ss_top", top);
-    }
-    else {
-      i_img_destroy(result);
-      result = NULL;
     }
   }
   /* clean up */
