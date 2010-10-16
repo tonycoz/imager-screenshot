@@ -180,11 +180,33 @@ Currently the image is always returned as a 24-bit image.
 
 =item screenshot hwnd => I<window handle>, decor => <capture decorations>
 
+=item screenshot hwnd => "active"
+
 Retrieve a screenshot under Win32, if I<window handle> is zero,
 capture the desktop.
 
 By default, window decorations are not captured, if the C<decor>
 parameter is set to true then window decorations are included.
+
+As of 0.010 hwnd can also be C<"active"> to capture the active (or
+"foreground") window.
+
+=item screenshot hwnd => 0
+
+Retrieve a screeshot of the default desktop under Win32.
+
+=item screenshot hwnd => 0, display => -1
+
+Retrieve a screenshot of all attached monitors under Win32.
+
+Note: this returns an image with an alpha channel, since there can be
+regions in the bounding rectangle of all monitors that no particular
+monitor covers.
+
+=item screenshot hwnd => 0, display => I<index>
+
+Retrieve a screenshot from a particular monitor under Win32.  A
+I<display> of zero is always treated as the primary monitor.
 
 =item screenshot id => I<window id>
 

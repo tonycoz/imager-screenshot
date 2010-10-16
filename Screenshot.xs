@@ -5,6 +5,9 @@
 #include "imext.h"
 #include "imperl.h"
 #include "imss.h"
+#ifdef SS_WIN32
+#include "svwin32.h"
+#endif
 
 DEFINE_IMAGER_CALLBACKS;
 
@@ -18,7 +21,7 @@ PROTOTYPES: DISABLE
 
 Imager::ImgRaw
 imss_win32(hwnd, include_decor = 0, left = 0, top = 0, right = 0, bottom = 0, display = 0)
-	unsigned hwnd
+	SSHWND hwnd
 	int include_decor
 	int left
 	int top

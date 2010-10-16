@@ -13,6 +13,9 @@ Screenshot.xs			Interface to C code
 scdarwin.c			Darwin implementation
 scwin32.c			Win32 implementation
 scx11.c				X11 implementation
+svwin32.c			Win32 translate SV to HWND
+svwin32.h			Win32 translate SV to HWND (header)
+typemap				Type conversion
 t/00load.t			Test - can we load the modules
 t/10win32.t			Test - win32 implementation
 t/20x11.t			Test - X11 implementation

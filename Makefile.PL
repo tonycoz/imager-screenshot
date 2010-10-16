@@ -34,7 +34,7 @@ if (find_header('windows.h', "Win32 header")
     || check_lib(header => "windows.h",
 		 lib => "gdi32",
 		 title => "Win32")) {
-  push @objs, 'scwin32.o';
+  push @objs, 'scwin32.o', 'svwin32.o';
   push @cflags, '-DSS_WIN32';
   if ($^O eq 'cygwin') {
     push @lflags, '-L/usr/lib/w32api', '-lgdi32';
