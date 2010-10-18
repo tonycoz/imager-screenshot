@@ -8,6 +8,31 @@
 #define DISPLAY_DEVICE_ACTIVE 1
 #endif
 
+static void
+i_push_win32_errorf(DWORD msg_id, char const *fmt, ...) {
+  va_list args;
+  LPSTR msg;
+  char buf[1000];
+
+  va_start(args, fmt);
+  vsprintf(buf, fmt, args);
+  if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+		    NULL,
+		    msg_id,
+		    0, /* LANGID */
+		    (LPSTR)&msg,
+		    0,
+		    NULL)) {
+    strcat(buf, msg);
+    LocalFree(msg);
+  }
+  else {
+    sprintf(buf+strlen(buf), "%#010x", msg_id);
+  }
+  i_push_error(msg_id, buf);
+  va_end(args);
+}
+
 struct monitor_ctx {
   i_img *out;
   i_img_dim orig_x, orig_y;
@@ -61,7 +86,7 @@ display_to_img(HDC dc, i_img *im, const RECT *src, int dest_x, int dest_y) {
     result = 1;
   }
   else {
-    i_push_errorf(0, "GetDIBits() failure %d", (long)GetLastError());
+    i_push_win32_errorf(GetLastError(), "GetDIBits() failure: ");
   }
 
   myfree(di_bits);
@@ -83,7 +108,6 @@ monitor_enum(HMONITOR hmon, HDC dc, LPRECT r, LPARAM lp_ctx) {
 
   return ctx->good;
 }
-
 
 i_img *
 imss_win32(unsigned hwnd_u, int include_decor, int left, int top, 
@@ -129,19 +153,56 @@ imss_win32(unsigned hwnd_u, int include_decor, int left, int top,
     else {
       DISPLAY_DEVICE dd;
       dd.cb = sizeof(dd);
+      int work_display = 0;
+      int primary_display = -1;
+      int real_display = -1;
 
-      if (EnumDisplayDevices(NULL, display, &dd, 0)) {
-	printf("Flags %lx\n", (unsigned long)dd.StateFlags);
-	if (dd.StateFlags & DISPLAY_DEVICE_ACTIVE) {
-	  cdc = CreateDC(dd.DeviceName, dd.DeviceName, NULL, NULL);
+      /* look for the primary display, we need a simulate a gap to put the
+	 primary at 0 */
+      while (work_display < 100
+	     && EnumDisplayDevices(NULL, work_display, &dd, 0)) {
+	if (dd.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) {
+	  primary_display = work_display;
+	  break;
 	}
-	else {
-	  i_push_errorf(0, "Display device %d not active", display);
+	else if (display && display-1 == work_display) {
+	  real_display = work_display;
+	  break;
+	}
+	
+	dd.cb = sizeof(dd);
+	++work_display;
+      }
+
+      if (!work_display && real_display == -1 && primary_display == -1) {
+	/* EnumDisplayDevices() failed for the first call */
+	i_push_win32_errorf(GetLastError(), "Cannot enumerate device %d(0): ", work_display);
+	return NULL;
+      }
+
+      if (primary_display != -1 && display == 0) {
+	real_display = primary_display;
+      }
+      
+      if (real_display == -1) {
+	/* haven't enumerated the display we want yet */
+	/* we're after the primary */
+	real_display = display;
+	dd.cb = sizeof(dd);
+	if (!EnumDisplayDevices(NULL, real_display, &dd, 0)) {
+	  i_push_win32_errorf(GetLastError(), "Cannot enumerate device %d(%d): ",
+			real_display, display);
 	  return NULL;
 	}
       }
-      else {
-	i_push_errorf(0, "Cannot enumerate device %d: %ld", display, (long)GetLastError());
+
+      if (!(dd.StateFlags & DISPLAY_DEVICE_ACTIVE)) {
+	i_push_errorf(0, "Display device %d not active", display);
+	return NULL;
+      }
+      cdc = CreateDC(dd.DeviceName, dd.DeviceName, NULL, NULL);
+      if (!cdc) {
+	i_push_win32_errorf(GetLastError(), "Cannot CreateDC(%s): ", dd.DeviceName);
 	return NULL;
       }
 
