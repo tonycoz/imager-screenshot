@@ -16,7 +16,7 @@ use Imager::Screenshot 'screenshot';
 Imager::Screenshot->have_win32
     or plan skip_all => "No Win32 support";
 
-plan tests => 13;
+plan tests => 15;
 
 {
   my $im = screenshot(hwnd => 0);
@@ -52,4 +52,10 @@ plan tests => 13;
      "check image width against window size");
   is($im->tags(name => 'ss_window_height'), 30 + $im->getheight + 17,
      "check image height against window size");
+}
+
+{ # full multi-monitor desktop
+  my $im = screenshot(hwnd => 0, monitor => -1);
+  ok($im, "full desktop");
+  is($im->getchannels, 4, "should have an alpha channel");
 }
