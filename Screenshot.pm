@@ -35,6 +35,7 @@ sub screenshot {
      top => 0,
      right => 0,
      bottom => 0,
+     monitor => 0,
      @_);
 
   my $result;
@@ -42,7 +43,7 @@ sub screenshot {
     defined &_win32
       or die "Win32 driver not enabled\n";
     $result = _win32($opts{hwnd}, $opts{decor}, $opts{left}, $opts{top},
-		     $opts{right}, $opts{bottom}, $opts{display});
+		     $opts{right}, $opts{bottom}, $opts{monitor});
   }
   elsif (defined $opts{id}) { # X11 window id
     exists $opts{display} or $opts{display} = 0;
@@ -88,7 +89,7 @@ sub screenshot {
   else {
     $result =
       defined &_win32 ? _win32(0, $opts{decor}, $opts{left}, $opts{top},
-			       $opts{right}, $opts{bottom}, $opts{display}) :
+			       $opts{right}, $opts{bottom}, $opts{monitor}) :
       defined &_darwin ? _darwin($opts{left}, $opts{top},
 				 $opts{right}, $opts{bottom}) :
       defined &_x11 ? _x11($opts{display}, 0, $opts{left}, $opts{top},
@@ -195,7 +196,7 @@ As of 0.010 hwnd can also be C<"active"> to capture the active (or
 
 Retrieve a screeshot of the default desktop under Win32.
 
-=item screenshot hwnd => 0, display => -1
+=item screenshot hwnd => 0, monitor => -1
 
 Retrieve a screenshot of all attached monitors under Win32.
 
@@ -203,10 +204,12 @@ Note: this returns an image with an alpha channel, since there can be
 regions in the bounding rectangle of all monitors that no particular
 monitor covers.
 
-=item screenshot hwnd => 0, display => I<index>
+=item screenshot hwnd => 0, monitor => I<index>
 
 Retrieve a screenshot from a particular monitor under Win32.  A
-I<display> of zero is always treated as the primary monitor.
+I<monitor> of zero is always treated as the primary monitor.
+
+If the given monitor is not active screenshot() will fail.
 
 =item screenshot id => I<window id>
 
