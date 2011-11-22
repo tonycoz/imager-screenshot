@@ -1,3 +1,11 @@
+0.011 unreleased
+
+- transition to git
+
+- allow builds on MSVC, there was a statement mixed in with some
+  declarations.
+  Thanks to Sri Vedurumudi for the report.
+
 0.010 18 Oct 2010
 
 - multiple monitor support for Win32

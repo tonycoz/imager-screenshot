@@ -152,11 +152,11 @@ imss_win32(unsigned hwnd_u, int include_decor, int left, int top,
     }
     else {
       DISPLAY_DEVICE dd;
-      dd.cb = sizeof(dd);
       int work_display = 0;
       int primary_display = -1;
       int real_display = -1;
 
+      dd.cb = sizeof(dd);
       /* look for the primary display, we need a simulate a gap to put the
 	 primary at 0 */
       while (work_display < 100
