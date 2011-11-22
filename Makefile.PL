@@ -165,12 +165,22 @@ sub _find_file {
   grep -f File::Spec->catfile($_, $name), @where;
 }
 
+sub _quote_spaces {
+  my $path = shift;
+
+  if ($path =~ / /) {
+    return qq("$path");
+  }
+
+  return $path;
+}
+
 sub find_header {
   my ($name, $description) = @_;
   my @found = _find_file($_[0], header_search_path());
 
   if (@found) {
-    push @cflags, "-I$_" for grep !$seen_incdir{$_}, @found;
+    push @cflags, _quote_spaces("-I$_") for grep !$seen_incdir{$_}, @found;
     @seen_incdir{@found} = (1) x @found;
   }
   else {
