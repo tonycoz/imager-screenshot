@@ -1,0 +1,17 @@
+*.o
+*.obj
+blib
+*.pdb
+MYMETA.yml
+Makefile
+Makefile.old
+*.bs
+Screenshot.c
+Screenshot.def
+dll.base
+dll.exp
+pm_to_blib
+*~
+MANIFEST.bak
+Imager-Screenshot-*
+
