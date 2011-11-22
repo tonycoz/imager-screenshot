@@ -207,7 +207,7 @@ sub find_lib {
     }
   }
   if (@found) {
-    push @lflags, "-L$_" for grep !$seen_libdir{$_}, @found;
+    push @lflags, _quote_spaces("-L$_") for grep !$seen_libdir{$_}, @found;
     @seen_libdir{@found} = (1) x @found;
   }
   else {
@@ -217,12 +217,3 @@ sub find_lib {
   @found;
 }
 
-# wrapper around assert lib that doesn't exit and doesn't die
-sub check_lib {
-  my (%opts) = @_;
-
-  my $title = delete $opts{title};
-  $title and print "Looking even harder for $title\n";
-
-  return eval { assert_lib(%opts); 1 };
-}

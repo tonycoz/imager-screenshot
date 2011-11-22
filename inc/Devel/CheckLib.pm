@@ -1,19 +1,23 @@
 # $Id: CheckLib.pm,v 1.25 2008/10/27 12:16:23 drhyde Exp $
+# This is a modified version of Devel::CheckLib 0.93 including the patches from
+# RT issues 60176 and 61645
 
 package #
 Devel::CheckLib;
 
+use 5.00405; #postfix foreach
 use strict;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '0.699_001';
-use Config;
+$VERSION = '0.93_001';
+use Config qw(%Config);
+use Text::ParseWords 'quotewords';
 
 use File::Spec;
 use File::Temp;
 
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT = qw(assert_lib check_lib_or_exit);
+@EXPORT = qw(assert_lib check_lib_or_exit check_lib);
 
 # localising prevents the warningness leaking out of this module
 local $^W = 1;    # use warnings is a 5.6-ism
@@ -138,6 +142,23 @@ This can also be supplied on the command-line.
 
 =back
 
+If you need to perform know more than "does it link?" you can provide
+code to be compiled and run:
+
+=over
+
+=item function
+
+the body of the <main()> function.  If not provided C<return 0;> is
+used.
+
+=item prologue
+
+code to insert between the C<#include> of the headers and the
+definition of main.
+
+=back
+
 =head2 check_lib_or_exit
 
 This behaves exactly the same as C<assert_lib()> except that instead of
@@ -151,6 +172,11 @@ causing a CPAN Testers 'FAIL' report.  CPAN Testers should ignore this
 result -- which is what you want if an external library dependency is not
 available.
 
+=head2 check_lib
+
+This behaves exactly the same as C<assert_lib()> except that it is silent,
+returning false instead of dieing, or true otherwise.
+
 =cut
 
 sub check_lib_or_exit {
@@ -159,6 +185,11 @@ sub check_lib_or_exit {
         warn $@;
         exit;
     }
+}
+
+sub check_lib {
+    eval 'assert_lib(@_)';
+    return $@ ? 0 : 1;
 }
 
 sub assert_lib {
@@ -175,10 +206,15 @@ sub assert_lib {
     @incpaths = (ref($args{incpath}) ? @{$args{incpath}} : $args{incpath}) 
         if $args{incpath};
 
+    # each entry is an arrayref containing:
+    # 0: arrayref of library search paths
+    # 1: arrayref of library names
+    my @link_cfgs = map [ \@libpaths, [ $_ ] ], @libs;
+
     # work-a-like for Makefile.PL's LIBS and INC arguments
     # if given as command-line argument, append to %args
     for my $arg (@ARGV) {
-        for my $mm_attr_key qw(LIBS INC) {
+        for my $mm_attr_key (qw(LIBS INC)) {
             if (my ($mm_attr_value) = $arg =~ /\A $mm_attr_key = (.*)/x) {
             # it is tempting to put some \s* into the expression, but the
             # MM command-line parser only accepts LIBS etc. followed by =,
@@ -190,28 +226,44 @@ sub assert_lib {
 
     # using special form of split to trim whitespace
     if(defined($args{LIBS})) {
-        foreach my $arg (split(' ', $args{LIBS})) {
-            die("LIBS argument badly-formed: $arg\n") unless($arg =~ /^-l/i);
-            push @{$arg =~ /^-l/ ? \@libs : \@libpaths}, substr($arg, 2);
-        }
+        if (ref $args{LIBS}) {
+	    foreach my $arg (@{$args{LIBS}}) {
+		my @sep = split ' ', $arg;
+		my @libs = map { /^-l(.+)$/ ? $1 : () } @sep;
+		my @paths = map { /^-L(.+)$/ ? $1 : () } @sep;
+		push @link_cfgs, [ \@paths, \@libs ];
+	    }
+	}
+	else {
+	    my @libs;
+	    my @paths;
+	    foreach my $arg (split(' ', $args{LIBS})) {
+		die("LIBS argument badly-formed: $arg\n") unless($arg =~ /^-l/i);
+		push @{$arg =~ /^-l/ ? \@libs : \@paths}, substr($arg, 2);
+	    }
+	    push @link_cfgs, map [ \@paths, [ $_ ] ], @libs;
+	}
     }
     if(defined($args{INC})) {
-        foreach my $arg (split(' ', $args{INC})) {
+        foreach my $arg (_shellwords($args{INC})) {
             die("INC argument badly-formed: $arg\n") unless($arg =~ /^-I/);
             push @incpaths, substr($arg, 2);
         }
     }
 
-    my @cc = _findcc();
+    my ($cc, $ld) = _findcc();
     my @missing;
     my @wrongresult;
+    my @use_headers;
 
     # first figure out which headers we can't find ...
     for my $header (@headers) {
+        push @use_headers, $header;
         my($ch, $cfile) = File::Temp::tempfile(
             'assertlibXXXXXXXX', SUFFIX => '.c'
         );
-        print $ch qq{#include <$header>\nint main(void) { return 0; }\n};
+        print $ch qq{#include <$_>\n} for @use_headers;
+        print $ch qq{int main(void) { return 0; }\n};
         close($ch);
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
         my @sys_cmd;
@@ -219,21 +271,25 @@ sub assert_lib {
         if ( $Config{cc} eq 'cl' ) {                 # Microsoft compiler
             require Win32;
             @sys_cmd = (
-                @cc,
+                @$cc,
                 $cfile,
                 "/Fe$exefile",
-                (map { '/I'.Win32::GetShortPathName($_) } @incpaths)
+                (map { '/I'.Win32::GetShortPathName($_) } @incpaths),
+                "/link",
+                @$ld
             );
         } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
             @sys_cmd = (
-                @cc,
+                @$cc,
                 (map { "-I$_" } @incpaths),
                 "-o$exefile",
-                $cfile
+                $cfile,
+                @$ld
             );
         } else { # Unix-ish: gcc, Sun, AIX (gcc, cc), ...
             @sys_cmd = (
-                @cc,
+                @$cc,
+                @$ld,
                 $cfile,
                 (map { "-I$_" } @incpaths),
                 "-o", "$exefile"
@@ -251,9 +307,11 @@ sub assert_lib {
         'assertlibXXXXXXXX', SUFFIX => '.c'
     );
     print $ch qq{#include <$_>\n} foreach (@headers);
+    print $ch "\n$args{prologue}\n" if $args{prologue};
     print $ch "int main(void) { ".($args{function} || 'return 0;')." }\n";
     close($ch);
-    for my $lib ( @libs ) {
+    for my $link_cfg ( @link_cfgs ) {
+	my ($paths, $libs) = @$link_cfg;
         my $exefile = File::Temp::mktemp( 'assertlibXXXXXXXX' ) . $Config{_exe};
         my @sys_cmd;
         if ( $Config{cc} eq 'cl' ) {                 # Microsoft compiler
@@ -261,39 +319,45 @@ sub assert_lib {
             my @libpath = map { 
                 q{/libpath:} . Win32::GetShortPathName($_)
             } @libpaths; 
+            # this is horribly sensitive to the order of arguments
             @sys_cmd = (
-                @cc,
+                @$cc,
                 $cfile,
-                "${lib}.lib",
+                ( map { "$_.lib" } @$libs ),
                 "/Fe$exefile", 
                 (map { '/I'.Win32::GetShortPathName($_) } @incpaths),
                 "/link",
-                (map {'/libpath:'.Win32::GetShortPathName($_)} @libpaths),
+		@$ld,
+                (map {'/libpath:'.Win32::GetShortPathName($_)} @$paths),
             );
         } elsif($Config{cc} eq 'CC/DECC') {          # VMS
         } elsif($Config{cc} =~ /bcc32(\.exe)?/) {    # Borland
             @sys_cmd = (
-                @cc,
+                @$cc,
+		@$ld,
                 "-o$exefile",
-                "-l$lib",
+                (map { "-l$_" } @$libs ),
                 (map { "-I$_" } @incpaths),
-                (map { "-L$_" } @libpaths),
+                (map { "-L$_" } @$paths),
                 $cfile);
         } else {                                     # Unix-ish
                                                      # gcc, Sun, AIX (gcc, cc)
             @sys_cmd = (
-                @cc,
+                @$cc,
+		@$ld,
                 $cfile,
                 "-o", "$exefile",
-                "-l$lib",
+                (map { "-l$_" } @$libs ),
                 (map { "-I$_" } @incpaths),
-                (map { "-L$_" } @libpaths)
+                (map { "-L$_" } @$paths)
             );
         }
         warn "# @sys_cmd\n" if $args{debug};
         my $rv = $args{debug} ? system(@sys_cmd) : _quiet_system(@sys_cmd);
-        push @missing, $lib if $rv != 0 || ! -x $exefile;
-        push @wrongresult, $lib if $rv == 0 && -x $exefile && system(File::Spec->rel2abs($exefile)) != 0; 
+        push @missing, @$libs if $rv != 0 || ! -x $exefile;
+        my $absexefile = File::Spec->rel2abs($exefile);
+        $absexefile = '"'.$absexefile.'"' if $absexefile =~ m/\s/;
+        push @wrongresult, @$libs if $rv == 0 && -x $exefile && system($absexefile) != 0;
         _cleanup_exe($exefile);
     } 
     unlink $cfile;
@@ -311,18 +375,53 @@ sub _cleanup_exe {
     unlink $exefile if -f $exefile;
     unlink $ofile if -f $ofile;
     unlink "$exefile\.manifest" if -f "$exefile\.manifest";
+    if ( $Config{cc} eq 'cl' ) {
+	# MSVC also creates foo.ilk and foo.pdb
+	my $ilkfile = $exefile;
+	$ilkfile =~ s/$Config{_exe}$/.ilk/;
+	my $pdbfile = $exefile;
+	$pdbfile =~ s/$Config{_exe}$/.pdb/;
+	unlink $ilkfile if -f $ilkfile;
+	unlink $pdbfile if -f $pdbfile;
+    }
     return
 }
-    
+
+# return ($cc, $ld)
+# where $cc is an array ref of compiler name, compiler flags
+# where $ld is an array ref of linker flags
 sub _findcc {
+    # Need to use $keep=1 to work with MSWin32 backslashes and quotes
+    my $Config_ccflags =  $Config{ccflags};  # use copy so ASPerl will compile
+    my @Config_ldflags =  @Config{qw(ldflags perllibs)};
+    my @ccflags = grep { length } quotewords('\s+', 1, $Config_ccflags);
+    my @ldflags = grep { length } quotewords('\s+', 1, @Config_ldflags);
     my @paths = split(/$Config{path_sep}/, $ENV{PATH});
     my @cc = split(/\s+/, $Config{cc});
-    return @cc if -x $cc[0];
+    return ( [ @cc, @ccflags ], \@ldflags ) if -x $cc[0];
     foreach my $path (@paths) {
         my $compiler = File::Spec->catfile($path, $cc[0]) . $Config{_exe};
-        return ($compiler, @cc[1 .. $#cc]) if -x $compiler;
+        return ([ $compiler, @cc[1 .. $#cc], @ccflags ], \@ldflags)
+            if -x $compiler;
     }
     die("Couldn't find your C compiler\n");
+}
+
+sub _shellwords {
+    my $line = shift;
+
+    if ($^O eq "MSWin32") {
+	my @elements;
+	$line =~ s/^\s+//;
+	while ($line =~ s/^"([^"]*)"// || $line =~ s/^(\S+)//) {
+	  push @elements, $1;
+	  $line =~ s/^\s+//;
+	}
+	return @elements;
+    }
+    else {
+	return grep defined && /\S/, quotewords('\s+', 0, $line);
+    } 
 }
 
 # code substantially borrowed from IPC::Run3
@@ -409,10 +508,14 @@ David Cantrell E<lt>david@cantrell.org.ukE<gt>
 
 David Golden E<lt>dagolden@cpan.orgE<gt>
 
+Yasuhiro Matsumoto E<lt>mattn@cpan.orgE<gt>
+
 Thanks to the cpan-testers-discuss mailing list for prompting us to write it
 in the first place;
 
-to Chris Williams for help with Borland support.
+to Chris Williams for help with Borland support;
+
+to Tony Cook for help with Microsoft compiler command-line options
 
 =head1 COPYRIGHT and LICENCE
 
