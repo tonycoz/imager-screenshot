@@ -107,7 +107,14 @@ if ($eu_mm_version >= 6.46) {
      {
       Imager => "0.69",
       "Test::More" => "0.47",
-     }
+     },
+     dynamic_config => 1,
+     resources =>
+     {
+      homepage => "http://imager.perl.org/",
+      repository => "git://git.imager.perl.org/imager-screenshot.git",
+      bugtracker => "http://rt.cpan.org/NoAuth/Bugs.html?Dist=Imager-Screenshot",
+     },
     };
 }
 
