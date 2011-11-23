@@ -10,7 +10,7 @@ push @ISA, 'Exporter';
 BEGIN {
   require Exporter;
   @ISA = qw(Exporter);
-  $VERSION = '0.010';
+  $VERSION = '0.011';
   eval {
     # try XSLoader first, DynaLoader has annoying baggage
     require XSLoader;
