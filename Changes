@@ -5,6 +5,15 @@
 - allow builds on MSVC, there was a statement mixed in with some
   declarations.
   Thanks to Sri Vedurumudi for the report.
+  https://rt.cpan.org/Ticket/Display.html?id=72631
+
+- update Devel::CheckLib to avoid C< for qw(...) >
+
+- update ppport.h to avoid a redefinition warning
+
+- add some META.yml metadata
+
+- quote spaces in -I and -L options to avoid problems on Win32.
 
 0.010 18 Oct 2010
 
